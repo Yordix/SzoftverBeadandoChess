@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Knightgame.javafx.controller.OpeningController">
+   <children>
+      <Label layoutX="169.0" layoutY="104.0" text="Move the Knights">
+         <font>
+            <Font size="30.0" />
+         </font>
+      </Label>
+      <Label layoutX="60.0" layoutY="273.0" text="#1 Competitor">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Label>
+      <Label layoutX="393.0" layoutY="273.0" text="#2 Competitor">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Label>
+      <TextField fx:id="playerOneNameTextField" layoutX="63.0" layoutY="316.0" />
+      <TextField fx:id="playerTwoNameTextField" layoutX="382.0" layoutY="316.0" />
+      <Button fx:id="startButton" layoutX="197.0" layoutY="181.0" mnemonicParsing="false" onAction="#startAction" text="Let the game begin">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Button>
+      <Label fx:id="errorLabel" layoutX="224.0" layoutY="244.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="16.0" prefWidth="169.0" textFill="RED" />
+      <Button layoutX="249.0" layoutY="231.0" mnemonicParsing="false" onAction="#goToLeaderboard" text="Leaderboard" />
+   </children>
+</Pane>

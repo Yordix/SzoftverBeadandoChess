@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Knightgame.javafx.controller.HighscoreController">
+   <children>
+      <TableView layoutX="20.0" layoutY="50.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="600.0">
+        <columns>
+          <TableColumn prefWidth="203.0" text="Competitor Name" />
+            <TableColumn prefWidth="201.0" text="Triumph" />
+            <TableColumn prefWidth="195.0" text="Total Steps" />
+        </columns>
+      </TableView>
+      <Label layoutX="238.0" text="Leaderboard">
+         <font>
+            <Font size="30.0" />
+         </font>
+      </Label>
+      <Button layoutX="287.0" layoutY="555.0" mnemonicParsing="false" onAction="#handleRestartButton" text="Restart">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </Button>
+   </children>
+</Pane>

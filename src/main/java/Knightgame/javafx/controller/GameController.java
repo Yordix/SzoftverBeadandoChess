@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.errorprone.annotations.Var;
 import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -12,15 +11,23 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import Knightgame.model.KnightGameModel;
 import javafx.scene.layout.StackPane;
@@ -31,6 +38,7 @@ import org.tinylog.Logger;
 
 import Knightgame.model.KnightDirection;
 import Knightgame.model.Position;
+import Knightgame.javafx.controller.PlayerController;
 
 
 public class GameController {
@@ -44,29 +52,25 @@ public class GameController {
     @FXML
     private Label stepsLabel;
 
-
-
-
-
-    @FXML
-    private Button resetButton;
-
-    @FXML
-    private Button giveupButton;
-
-
-
-
     private KnightGameModel gameState;
+
+    private int turnCount;
+
+    private PlayerController pc = new PlayerController();
 
 
     private IntegerProperty steps = new SimpleIntegerProperty();
 
     private String playerOneName;
     private String playerTwoName;
-    public void setPlayerOneName(String playerOneName) {this.playerOneName = playerOneName;}
-    public void setPlayerTwoName(String playerTwoName) {this.playerTwoName = playerTwoName;}
 
+    public void setPlayerOneName(String playerOneName) {
+        this.playerOneName = playerOneName;
+    }
+
+    public void setPlayerTwoName(String playerTwoName) {
+        this.playerTwoName = playerTwoName;
+    }
 
 
     private enum SelectionPhase {
@@ -80,13 +84,24 @@ public class GameController {
             };
         }
     }
+
     private SelectionPhase selectionPhase = SelectionPhase.SELECT_FROM;
 
     private List<Position> selectablePositions = new ArrayList<>();
 
+    private List<Position> takenPositions = new ArrayList<>();
+
+    private Position P1pos = new Position(KnightGameModel.BOARD_SIZE - 1, KnightGameModel.BOARD_SIZE - 1);
+    private Position P2pos = new Position(0, 0);
+
     private Position selected;
 
     private KnightGameModel model = new KnightGameModel();
+
+    private void addTakenPosition() {
+        takenPositions.add(P1pos);
+        takenPositions.add(P2pos);
+    }
 
     @FXML
     private void initialize() {
@@ -95,11 +110,9 @@ public class GameController {
         createPieces();
         setSelectablePositions();
         showSelectablePositions();
-        Platform.runLater(() -> mainLabel.setText(String.format("Let's get to battle <%s> and <%s>",playerOneName,playerTwoName)));
+        Platform.runLater(() -> mainLabel.setText(String.format("Let's get to battle <%s> and <%s>", playerOneName, playerTwoName)));
         stepsLabel.textProperty().bind(steps.asString());
     }
-
-
 
     private void createBoard() {
         for (int i = 0; i < gameBoard.getRowCount(); i++) {
@@ -108,10 +121,6 @@ public class GameController {
                 gameBoard.add(square, j, i);
             }
         }
-
-
-
-
     }
 
     private StackPane createSquare() {
@@ -148,22 +157,32 @@ public class GameController {
     }
 
     private void handleClickOnSquare(Position position) {
-        switch (selectionPhase) {
-            case SELECT_FROM -> {
-                if (selectablePositions.contains(position)) {
-                    selectPosition(position);
-                    alterSelectionPhase();
+        if (pc.getNextPlayer() == PlayerController.Player.PLAYER1) {
+            switch (selectionPhase) {
+                case SELECT_FROM -> {
+                    if (selectablePositions.contains(position)) {
+                        selectPosition(position);
+                        alterSelectionPhase();
+                    }
+                    if (selectablePositions.size() == 0) {
+                        endGame();
+                    }
                 }
-            }
-            case SELECT_TO -> {
-                if (selectablePositions.contains(position)) {
-                    var pieceNumber = model.getPieceNumber(selected).getAsInt();
-                    var direction = KnightDirection.of(position.row() - selected.row(), position.col() - selected.col());
-                    Logger.debug("Moving piece {} {}", pieceNumber, direction);
-                    model.move(pieceNumber, direction);
-                    steps.set(steps.get() + 1);
-                    deselectSelectedPosition();
-                    alterSelectionPhase();
+
+                case SELECT_TO -> {
+                    if (selectablePositions.contains(position)) {
+                        var pieceNumber = model.getPieceNumber(selected).getAsInt();
+                        var direction = KnightDirection.of(position.row() - selected.row(), position.col() - selected.col());
+                        Logger.debug("Moving piece {} {}", pieceNumber, direction);
+                        model.move(pieceNumber, direction);
+                        takenPositions.add(new Position(position.row(), position.col()));
+                        P1pos = new Position(position.row(), position.col());
+                        showTakenPositions();
+                        steps.set(steps.get() + 1);
+                        deselectSelectedPosition();
+                        alterSelectionPhase();
+                        pc.getNextPlayer();
+                    }
                 }
             }
         }
@@ -178,42 +197,69 @@ public class GameController {
 
     private void selectPosition(Position position) {
         selected = position;
-        showSelectedPosition();
-    }
-
-    private void showSelectedPosition() {
-        var square = getSquare(selected);
-        square.getStyleClass().add("selected");
     }
 
     private void deselectSelectedPosition() {
-        hideSelectedPosition();
         selected = null;
     }
 
-    private void hideSelectedPosition() {
-        var square = getSquare(selected);
-        square.getStyleClass().remove("selected");
+    private void showTakenPositions()
+    {
+        for (var takenPos : takenPositions)
+        {
+            var square = getSquare(takenPos);
+            square.getStyleClass().add("taken");
+        }
     }
 
     private void setSelectablePositions() {
         selectablePositions.clear();
-        switch (selectionPhase) {
-            case SELECT_FROM -> selectablePositions.addAll(model.getPiecePositions());
-            case SELECT_TO -> {
-                var pieceNumber = model.getPieceNumber(selected).getAsInt();
-                for (var direction : model.getValidMoves(pieceNumber)) {
-                    selectablePositions.add(selected.moveTo(direction));
+        if (pc.getNextPlayer() == PlayerController.Player.PLAYER1) {
+            switch (selectionPhase) {
+                case SELECT_FROM -> selectablePositions.add(P1pos);
+
+                case SELECT_TO -> {
+                    var pieceNumber = model.getPieceNumber(selected).getAsInt();
+
+                    for (var direction : model.getValidMoves(pieceNumber)) {
+                        if (takenPositions.contains(selected.moveTo(direction))) {
+                            continue;
+                        }
+                        selectablePositions.add(selected.moveTo(direction));
+
+                    }
                 }
             }
         }
+        else{
+            switch (selectionPhase) {
+                case SELECT_FROM -> selectablePositions.add(P2pos);
+
+                case SELECT_TO -> {
+                    var pieceNumber = model.getPieceNumber(selected).getAsInt();
+
+                    for (var direction : model.getValidMoves(pieceNumber)) {
+                        if (takenPositions.contains(selected.moveTo(direction))) {
+                            continue;
+                        }
+                        selectablePositions.add(selected.moveTo(direction));
+
+                    }
+                }
+            }
+        }
+
     }
 
     private void showSelectablePositions() {
+        int i = 0;
         for (var selectablePosition : selectablePositions) {
             var square = getSquare(selectablePosition);
             square.getStyleClass().add("selectable");
+            Logger.info(i + ". selectablePosition: " + selectablePosition);
+            i++;
         }
+        Logger.debug("Number of selectable positions: " + i);
     }
 
     private void hideSelectablePositions() {
@@ -242,34 +288,18 @@ public class GameController {
         newSquare.getChildren().addAll(oldSquare.getChildren());
         oldSquare.getChildren().clear();
     }
-    public void handleResetButton(ActionEvent actionEvent)  {
-        Logger.debug("{} is pressed", ((Button) actionEvent.getSource()).getText());
-        Logger.info("Resetting game");
-        resetGame();
-    }
 
-    public void handleGiveUpButton(ActionEvent actionEvent) throws IOException {
-        var buttonText = ((Button) actionEvent.getSource()).getText();
-        Logger.debug("{} is pressed", buttonText);
-        if (buttonText.equals("Give Up")) {
-
-            Logger.info("The game has been given up");
+    private void endGame(){
+        if (PlayerController.getNextPlayer() == PlayerController.Player.PLAYER1){
+            Platform.runLater(() -> mainLabel.setText(String.format("The Winner is %s!", playerTwoName)));
+            Logger.info("{} winned the game!",playerTwoName);
+            var Winner = playerTwoName;
         }
-        Logger.debug("Saving result");
-
-        Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/highscore.fxml"));
-        Parent root = fxmlLoader.load();
-        stage.setScene(new Scene(root));
-        stage.show();
-
-    }
-
-
-    private void resetGame() {
-        gameState = new KnightGameModel();
-
-        steps.set(0);
+        else{
+            Platform.runLater(() -> mainLabel.setText(String.format("The Winner is %s!", playerOneName)));
+            Logger.info("{} winned the game!",playerOneName);
+            var Winner = playerOneName;
+        }
     }
 
 }

@@ -7,9 +7,9 @@
 }
 
 .selectable {
-    -fx-border-width: 5;
+    -fx-background-color: limegreen;
 }
 
-.invalid {
+.taken {
     -fx-background-color:
 }

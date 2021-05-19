@@ -2,6 +2,8 @@ package Knightgame.model;
 
 import javafx.beans.property.ObjectProperty;
 
+import Knightgame.javafx.controller.PlayerController;
+
 import java.util.*;
 
 public class KnightGameModel {
@@ -13,6 +15,7 @@ public class KnightGameModel {
     public KnightGameModel() {
         this(new Piece(PieceType.BLACK, new Position(0, 0)),
                 new Piece(PieceType.WHITE, new Position(BOARD_SIZE - 1, BOARD_SIZE - 1)));
+        PlayerController.nextPlayer.set(PlayerController.Player.PLAYER1);
     }
     public KnightGameModel(Piece... pieces) {
         checkPieces(pieces);
@@ -40,7 +43,8 @@ public class KnightGameModel {
         return pieces[pieceNumber].getPosition();
     }
 
-    public ObjectProperty<Position> positionProperty(int pieceNumber) {
+    public ObjectProperty<Position> positionProperty(int pieceNumber)
+    {
         return pieces[pieceNumber].positionProperty();
     }
 
@@ -70,8 +74,10 @@ public class KnightGameModel {
         return validMoves;
     }
 
-    public void move(int pieceNumber, KnightDirection direction) {
+    public void move(int pieceNumber, KnightDirection direction)
+    {
         pieces[pieceNumber].moveTo(direction);
+        PlayerController.nextPlayer.set(PlayerController.nextPlayer.get().next());
     }
 
     public static boolean isOnBoard(Position position) {

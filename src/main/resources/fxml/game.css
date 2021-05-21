@@ -1,9 +1,6 @@
 .square{
     -fx-border-style: solid;
-}
-
-.square:hover{
-    -fx-background-color: whitesmoke;
+    -fx-background-color: grey;
 }
 
 .selectable {
@@ -11,5 +8,5 @@
 }
 
 .taken {
-    -fx-background-color:
+    -fx-background-color: red;
 }

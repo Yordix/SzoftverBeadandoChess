@@ -2,7 +2,7 @@ package Knightgame.model;
 
 import javafx.beans.property.ObjectProperty;
 
-import Knightgame.javafx.controller.PlayerController;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 
 import java.util.*;
 
@@ -12,10 +12,28 @@ public class KnightGameModel {
 
     private final Piece[] pieces;
 
+    public enum Player {
+        PLAYER1, PLAYER2;
+
+        public Player next(){
+            return switch (this){
+                case PLAYER1 -> PLAYER2;
+                case PLAYER2 -> PLAYER1;
+            };
+        }
+    }
+
+    public Player getNextPlayer()
+    {
+        return nextPlayer.get();
+    }
+
+    public static ReadOnlyObjectWrapper<Player> nextPlayer = new ReadOnlyObjectWrapper<>();
+
     public KnightGameModel() {
         this(new Piece(PieceType.BLACK, new Position(0, 0)),
                 new Piece(PieceType.WHITE, new Position(BOARD_SIZE - 1, BOARD_SIZE - 1)));
-        PlayerController.nextPlayer.set(PlayerController.Player.PLAYER1);
+        nextPlayer.set(Player.PLAYER1);
     }
     public KnightGameModel(Piece... pieces) {
         checkPieces(pieces);
@@ -77,7 +95,7 @@ public class KnightGameModel {
     public void move(int pieceNumber, KnightDirection direction)
     {
         pieces[pieceNumber].moveTo(direction);
-        PlayerController.nextPlayer.set(PlayerController.nextPlayer.get().next());
+        nextPlayer.set(nextPlayer.get().next());
     }
 
     public static boolean isOnBoard(Position position) {

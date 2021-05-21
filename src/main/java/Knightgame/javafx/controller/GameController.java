@@ -1,6 +1,5 @@
 package Knightgame.javafx.controller;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,37 +7,19 @@ import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
-
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import Knightgame.model.KnightGameModel;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.stage.Stage;
 import org.tinylog.Logger;
 
 import Knightgame.model.KnightDirection;
 import Knightgame.model.Position;
-import Knightgame.javafx.controller.PlayerController;
 
 
 public class GameController {
@@ -56,9 +37,6 @@ public class GameController {
 
     private int turnCount;
 
-    private PlayerController pc = new PlayerController();
-
-
     private IntegerProperty steps = new SimpleIntegerProperty();
 
     private String playerOneName;
@@ -67,11 +45,11 @@ public class GameController {
     public void setPlayerOneName(String playerOneName) {
         this.playerOneName = playerOneName;
     }
-
     public void setPlayerTwoName(String playerTwoName) {
         this.playerTwoName = playerTwoName;
     }
 
+    private Position selected;
 
     private enum SelectionPhase {
         SELECT_FROM,
@@ -94,7 +72,7 @@ public class GameController {
     private Position P1pos = new Position(KnightGameModel.BOARD_SIZE - 1, KnightGameModel.BOARD_SIZE - 1);
     private Position P2pos = new Position(0, 0);
 
-    private Position selected;
+
 
     private KnightGameModel model = new KnightGameModel();
 
@@ -108,6 +86,7 @@ public class GameController {
         createBoard();
         Logger.debug("Created the Board!");
         createPieces();
+        addTakenPosition();
         setSelectablePositions();
         showSelectablePositions();
         Platform.runLater(() -> mainLabel.setText(String.format("Let's get to battle <%s> and <%s>", playerOneName, playerTwoName)));
@@ -123,6 +102,10 @@ public class GameController {
         }
     }
 
+    /**
+     * Creates square
+     * @return square
+     */
     private StackPane createSquare() {
         var square = new StackPane();
         square.getStyleClass().add("square");
@@ -157,7 +140,7 @@ public class GameController {
     }
 
     private void handleClickOnSquare(Position position) {
-        if (pc.getNextPlayer() == PlayerController.Player.PLAYER1) {
+        if (model.getNextPlayer() == KnightGameModel.Player.PLAYER1) {
             switch (selectionPhase) {
                 case SELECT_FROM -> {
                     if (selectablePositions.contains(position)) {
@@ -181,7 +164,39 @@ public class GameController {
                         steps.set(steps.get() + 1);
                         deselectSelectedPosition();
                         alterSelectionPhase();
-                        pc.getNextPlayer();
+                        model.getNextPlayer();
+                    }
+                }
+            }
+        }
+        else
+        {
+            switch (selectionPhase)
+            {
+                case SELECT_FROM -> {
+                    if (selectablePositions.contains(position))
+                    {
+                        selectPosition(position);
+                        alterSelectionPhase();
+                    }
+                    if (selectablePositions.size() == 0)
+                    {
+                        endGame();
+                    }
+                }
+                case SELECT_TO -> {
+                    if (selectablePositions.contains(position))
+                    {
+                        var pieceNumber = model.getPieceNumber(selected).getAsInt();
+                        var direction = KnightDirection.of(position.row() - selected.row(), position.col() - selected.col());
+                        model.move(pieceNumber, direction);
+                        takenPositions.add(new Position(position.row(), position.col()));
+                        P2pos = new Position(position.row(), position.col());
+                        showTakenPositions();
+                        steps.set(steps.get() + 1);
+                        deselectSelectedPosition();
+                        alterSelectionPhase();
+                        model.getNextPlayer();
                     }
                 }
             }
@@ -214,7 +229,7 @@ public class GameController {
 
     private void setSelectablePositions() {
         selectablePositions.clear();
-        if (pc.getNextPlayer() == PlayerController.Player.PLAYER1) {
+        if (model.getNextPlayer() == KnightGameModel.Player.PLAYER1) {
             switch (selectionPhase) {
                 case SELECT_FROM -> selectablePositions.add(P1pos);
 
@@ -290,13 +305,13 @@ public class GameController {
     }
 
     private void endGame(){
-        if (PlayerController.getNextPlayer() == PlayerController.Player.PLAYER1){
-            Platform.runLater(() -> mainLabel.setText(String.format("The Winner is %s!", playerTwoName)));
+        if (model.getNextPlayer() == KnightGameModel.Player.PLAYER1){
+            Platform.runLater(() -> mainLabel.setText(String.format("%s has triumph this day!", playerTwoName)));
             Logger.info("{} winned the game!",playerTwoName);
             var Winner = playerTwoName;
         }
         else{
-            Platform.runLater(() -> mainLabel.setText(String.format("The Winner is %s!", playerOneName)));
+            Platform.runLater(() -> mainLabel.setText(String.format("%s has triumph this day!", playerOneName)));
             Logger.info("{} winned the game!",playerOneName);
             var Winner = playerOneName;
         }

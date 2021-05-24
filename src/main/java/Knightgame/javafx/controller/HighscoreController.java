@@ -2,6 +2,7 @@ package Knightgame.javafx.controller;
 
 import java.io.IOException;
 
+import Knightgame.dao.HighScoreDAO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,12 +18,13 @@ import javafx.stage.Stage;
 
 import org.tinylog.Logger;
 
+import javax.inject.Inject;
+
 
 /**
  * This class controls the leaderboard at the end of the game.
  */
 public class HighscoreController {
-
     /**
      * This function handles the restart button at the end of the game.
      * @param actionEvent

@@ -3,6 +3,7 @@ package Knightgame.javafx.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import Knightgame.dao.HighScoreDAO;
 import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -20,6 +21,8 @@ import org.tinylog.Logger;
 
 import Knightgame.model.KnightDirection;
 import Knightgame.model.Position;
+
+import Knightgame.dao.Score;
 
 /**
  * This class provides the main controlling unit of the game.
@@ -48,6 +51,8 @@ public class GameController {
      * Counter of the steps.
      */
     private IntegerProperty steps = new SimpleIntegerProperty();
+
+    private Score score = new Score();
 
     /**
      * Name of the player one in the game.

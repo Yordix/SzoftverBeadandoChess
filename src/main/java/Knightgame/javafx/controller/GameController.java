@@ -236,6 +236,11 @@ public class GameController {
         handleClickOnSquare(position);
     }
 
+    /**
+     * Lead to the Highscorepanel.
+     * @param actionEvent ActionEvent
+     * @throws IOException Exception
+     */
     public void toTheWinnersBoard(ActionEvent actionEvent) throws IOException {
         Logger.debug("{} is pressed", ((Button) actionEvent.getSource()).getText());
         Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();

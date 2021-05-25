@@ -30,15 +30,28 @@ import javax.inject.Inject;
  * This class controls the leaderboard at the end of the game.
  */
 public class HighscoreController {
+
+    /**
+     * Draw the table.
+     */
     @FXML
     private TableView<Score> highScoreTable;
 
+    /**
+     * The winner player's name.
+     */
     @FXML
     private TableColumn<Score, String> name;
 
+    /**
+     * The winner player's score.
+     */
     @FXML
     private TableColumn<Score, String> score;
 
+    /**
+     * The date when the player won.
+     */
     @FXML
     private TableColumn<Score, String> date;
 
@@ -60,6 +73,9 @@ public class HighscoreController {
         stage.show();
     }
 
+    /**
+     * Initialize the Highscore board and the database.
+     */
     @FXML
     private void initialize(){
         HighScoreDAO highScoreDao = new HighScoreDAO();

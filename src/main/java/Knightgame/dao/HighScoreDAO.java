@@ -16,7 +16,7 @@ import java.net.URL;
  * The HighScoreDAO implements the methods to read and white XML file.
  */
 public class HighScoreDAO {
-    public String path = "src/main/resources/highscore.xml";
+    public String path = "src\\main\\resources\\highscore.xml";
     /**
      * Add to score to XML file.
      *

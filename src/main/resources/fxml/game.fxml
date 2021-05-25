@@ -62,6 +62,7 @@
                   <Insets />
                </VBox.margin>
             </Label>
+            <Button fx:id="winnerbutton" mnemonicParsing="false" onAction="#toTheWinnersBoard" text="Winners board" />
          </children>
       </VBox>
    </right>

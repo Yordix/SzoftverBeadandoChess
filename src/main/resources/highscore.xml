@@ -1,4 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <highscores>
-
+    <highscore>
+        <date>2021.05.25</date>
+        <name>Fa</name>
+        <score>46</score>
+    </highscore>
+    <highscore>
+        <date>2021.05.25</date>
+        <name>Ági</name>
+        <score>43</score>
+    </highscore>
+    <highscore>
+        <date>2021.05.25</date>
+        <name>Levi</name>
+        <score>39</score>
+    </highscore>
+    <highscore>
+        <date>2021.05.25</date>
+        <name>Norbi</name>
+        <score>26</score>
+    </highscore>
+    <highscore>
+        <date>2021.05.26</date>
+        <name>a</name>
+        <score>15</score>
+    </highscore>
 </highscores>

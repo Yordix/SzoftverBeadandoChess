@@ -1,5 +1,8 @@
 package Knightgame.javafx.controller;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +11,13 @@ import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -17,6 +26,7 @@ import Knightgame.model.KnightGameModel;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.stage.Stage;
 import org.tinylog.Logger;
 
 import Knightgame.model.KnightDirection;
@@ -34,6 +44,12 @@ public class GameController {
      */
     @FXML
     private Label mainLabel;
+
+    /**
+     * Declaration of the Highscore table button.
+     */
+    @FXML
+    private Button winnerbutton;
 
     /**
      * This is the declaration of the game board.
@@ -152,6 +168,8 @@ public class GameController {
         showSelectablePositions();
         Platform.runLater(() -> mainLabel.setText(String.format("Let's get to battle <%s> and <%s>", playerOneName, playerTwoName)));
         stepsLabel.textProperty().bind(steps.asString());
+        winnerbutton.setVisible(false);
+
     }
 
     /**
@@ -216,6 +234,16 @@ public class GameController {
         var position = new Position(row, col);
         Logger.debug("Click on square {}", position);
         handleClickOnSquare(position);
+    }
+
+    public void toTheWinnersBoard(ActionEvent actionEvent) throws IOException {
+        Logger.debug("{} is pressed", ((Button) actionEvent.getSource()).getText());
+        Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/highscore.fxml"));
+        Logger.debug("Loading HighScore.fxml");
+        Parent root = fxmlLoader.load();
+        stage.setScene(new Scene(root));
+        stage.show();
     }
 
     /**
@@ -433,17 +461,25 @@ public class GameController {
      * Finish the game.
      * Open up leaderboard.
      */
-    private void endGame(){
+    private void endGame() {
+        String Winner;
         if (model.getNextPlayer() == KnightGameModel.Player.PLAYER1){
             Platform.runLater(() -> mainLabel.setText(String.format("%s has triumph this day!", playerTwoName)));
             Logger.info("{} winned the game!",playerTwoName);
-            var Winner = playerTwoName;
+            Winner = playerTwoName;
         }
         else{
             Platform.runLater(() -> mainLabel.setText(String.format("%s has triumph this day!", playerOneName)));
             Logger.info("{} winned the game!",playerOneName);
-            var Winner = playerOneName;
+            Winner = playerOneName;
         }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        LocalDateTime dateTime = LocalDateTime.now();
+        String formattedDateTime = dateTime.format(formatter);
+        Score newScore = new Score(Winner, stepsLabel.getText(), formattedDateTime);
+        HighScoreDAO highScoreDAO = new HighScoreDAO();
+        highScoreDAO.addScore(newScore);
+        winnerbutton.setVisible(true);
     }
 
 }

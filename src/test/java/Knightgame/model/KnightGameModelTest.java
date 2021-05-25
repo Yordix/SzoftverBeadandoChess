@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class KnightGameModelTest {
 
-    private ReadOnlyObjectWrapper<KnightGameModel.Player> getNextPlayer = new ReadOnlyObjectWrapper<>();
+    private ReadOnlyObjectWrapper<KnightGameModel.Player> nextPlayer = new ReadOnlyObjectWrapper<>();
     KnightGameModel model = new KnightGameModel();
 
 
@@ -19,16 +19,16 @@ class KnightGameModelTest {
 
     @BeforeEach
     void init() {
-        getNextPlayer.set(KnightGameModel.Player.PLAYER1);
+        nextPlayer.set(KnightGameModel.Player.PLAYER1);
     }
 
     @Test
     void getNextPlayer(){
-        assertEquals(getNextPlayer.get(), KnightGameModel.Player.PLAYER1);
-        getNextPlayer.set(getNextPlayer.get().next());
-        assertEquals(getNextPlayer.get(), KnightGameModel.Player.PLAYER2);
-        getNextPlayer.set(getNextPlayer.get().next());
-        assertEquals(getNextPlayer.get(), KnightGameModel.Player.PLAYER1);
+        assertEquals(nextPlayer.get(), KnightGameModel.Player.PLAYER1);
+        nextPlayer.set(nextPlayer.get().next());
+        assertEquals(nextPlayer.get(), KnightGameModel.Player.PLAYER2);
+        nextPlayer.set(nextPlayer.get().next());
+        assertEquals(nextPlayer.get(), KnightGameModel.Player.PLAYER1);
     }
 
     @Test
